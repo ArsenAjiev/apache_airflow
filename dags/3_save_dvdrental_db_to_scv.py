@@ -84,7 +84,8 @@ with DAG(
             'connection': conn,
             'db': 'dvdrental',
             'table': 'public.payment',
-            'condition': "payment_date BETWEEN '2007-04-01' AND '2007-05-01'"
+            # payment_date BETWEEN '2007-02-01' AND '2007-03-01' - данные за февраль
+            'condition': "payment_date BETWEEN '2007-05-01' AND '2007-06-01'"
         },
         dag=dag,
     )

@@ -23,10 +23,10 @@ def write_from_csv_to_table(connection, database, tbl):
     """
     :param connection: подключение к БД DWH
     :param database: аргумент необходим для формирования пути к csv файлу
-    :param src_tbl: аргумент необходим для формирования пути к csv файлу
+    :param tbl: аргумент необходим для формирования пути к csv файлу
         path_to_csv = f'{dag_path}/raw_data/{database}.{src_tbl}.csv'
-    :param tg_tbl: целевая таблица в БД DWH куда будут записываться данные из csv файла
-    :return:
+    :param tbl: целевая таблица в БД DWH куда будут записываться данные из csv файла
+
     """
     cur = connection.cursor()
     truncate_sql = f'truncate table landing.{tbl}'

@@ -83,6 +83,34 @@ procedure_create_stage_payment_tbl = PostgresOperator(
     """,
 )
 
+procedure_create_stage_payment_tmm_tbl = PostgresOperator(
+    task_id="procedure_create_stage_payment_tmp_tbl",
+    postgres_conn_id="dwh",
+    sql="""
+    CREATE OR REPLACE PROCEDURE stage.create_payment_tmp_tbl()
+     LANGUAGE plpgsql
+    AS $procedure$
+    BEGIN
+
+    CREATE TABLE IF NOT EXISTS stage.payment_tmp
+    (
+    payment_id integer NOT NULL,
+    customer_id smallint NOT NULL,
+    staff_id smallint NOT NULL,
+    rental_id integer NOT NULL,
+    amount numeric(5,2) NOT NULL,
+    payment_date timestamp without time zone NOT NULL,
+    PRIMARY KEY (payment_id)
+    );
+
+        COMMIT;
+    END;$procedure$
+    ;    
+    """,
+)
+
+
+
 finish_create_procedure_stage = BashOperator(
     task_id="finish_create_procedure_stage",
     bash_command="echo finish_create_procedure_stage",
@@ -102,6 +130,14 @@ run_procedure_create_stage_payment_tbl = PostgresOperator(
     autocommit=True
 )
 
+run_procedure_create_stage_payment_tmp_tbl = PostgresOperator(
+    task_id="run_procedure_create_stage_payment_tmp_tbl",
+    postgres_conn_id="dwh",
+    sql=['call stage.create_payment_tmp_tbl()'],
+    autocommit=True
+)
+
+
 finish_run_procedure_stage = BashOperator(
     task_id="finish_run_procedure_stage",
     bash_command="echo finish_run_procedure_stage",
@@ -109,7 +145,7 @@ finish_run_procedure_stage = BashOperator(
 
 create_schema_stage >> \
 finish_create_schema_stage >> \
-[procedure_create_stage_actor_tbl, procedure_create_stage_payment_tbl] >> \
+[procedure_create_stage_actor_tbl, procedure_create_stage_payment_tbl, procedure_create_stage_payment_tmm_tbl] >> \
 finish_create_procedure_stage >> \
-[run_procedure_create_stage_actor_tbl, run_procedure_create_stage_payment_tbl] >> \
+[run_procedure_create_stage_actor_tbl, run_procedure_create_stage_payment_tbl, run_procedure_create_stage_payment_tmp_tbl] >> \
 finish_run_procedure_stage
