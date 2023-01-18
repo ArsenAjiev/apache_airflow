@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 from airflow.operators.python import PythonOperator
+from psycopg2 import OperationalError
 
 import os
 import psycopg2
@@ -10,12 +11,15 @@ import psycopg2
 dag_path = os.getcwd()
 
 # подключение к БД
-conn_source = psycopg2.connect(
-    dbname="dwh",
-    user="postgres",
-    password="tr134sdfWE",
-    port=5433,
-    host="host.docker.internal")
+try:
+    conn_source = psycopg2.connect(
+        dbname="dwh",
+        user="postgres",
+        password="tr134sdfWE",
+        port=5433,
+        host="host.docker.internal")
+except OperationalError as err:
+    conn_source = None
 
 
 # Запись данных из CSV файла в таблицу БД DWH

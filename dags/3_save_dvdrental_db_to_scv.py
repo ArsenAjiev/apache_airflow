@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 from airflow.operators.python import PythonOperator
+from psycopg2 import OperationalError
+
 
 import os
 import psycopg2
@@ -10,12 +12,17 @@ import psycopg2
 # нужен для загрузки данных в файл
 dag_path = os.getcwd()
 
-conn = psycopg2.connect(
-    dbname="dvdrental",
-    user="postgres",
-    password="tr134sdfWE",
-    port=5433,
-    host="host.docker.internal")
+try:
+    conn = psycopg2.connect(
+        dbname="dvdrental",
+        user="postgres",
+        password="tr134sdfWE",
+        port=5433,
+        host="host.docker.internal")
+except OperationalError as err:
+    conn = None
+
+
 
 
 # в функцию в качестве параметров передаем соединение с целевой БД (conn)
@@ -85,7 +92,7 @@ with DAG(
             'db': 'dvdrental',
             'table': 'public.payment',
             # payment_date BETWEEN '2007-02-01' AND '2007-03-01' - данные за февраль
-            'condition': "payment_date BETWEEN '2007-05-01' AND '2007-06-01'"
+            'condition': "payment_date BETWEEN '2007-03-01' AND '2007-04-01'"
         },
         dag=dag,
     )
